@@ -6,7 +6,9 @@ import toast from 'react-hot-toast';
 
 const Navbar = () => {
     const [open, setOpen] = React.useState(false);
-    const { user, setUser, setShowUserLogin, navigate, setSearchQuery , searchQuery} = useAppContext();
+    const { user, setUser, setShowUserLogin, navigate, setSearchQuery , searchQuery,
+            getCartCount
+    } = useAppContext();
 
     const logout = async () => {
         setUser(null);
@@ -42,7 +44,7 @@ const Navbar = () => {
                 {/* Cart */}
                 <div onClick={() => navigate("/cart")} className="relative cursor-pointer">
                     <img src={assets.nav_cart_icon} alt='cart' className='w-6 opacity-80' />
-                    <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">3</button>
+                    <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">{getCartCount()}</button>
                 </div>
 
                 {/* Login / Profile */}
@@ -61,10 +63,17 @@ const Navbar = () => {
                 )}
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <button onClick={() => setOpen(!open)} aria-label="Menu" className="sm:hidden">
+             <div className='flex items-center gap-6 sm:hidden'>
+
+                 {/* Mobile Menu Toggle */}
+                 <div onClick={() => navigate("/cart")} className="relative cursor-pointer">
+                    <img src={assets.nav_cart_icon} alt='cart' className='w-6 opacity-80' />
+                    <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">{getCartCount()}</button>
+                </div>
+            <button onClick={() => setOpen(!open)} aria-label="Menu" className="">
                 <img src={assets.menu_icon} alt='menu' />
             </button>
+             </div>
 
             {/* Mobile Menu */}
             {open && (
