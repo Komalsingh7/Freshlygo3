@@ -1,20 +1,34 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-import { dummyOrders } from '../assets/assets' 
 const MyOrders = () => {
 
   const [myOrders , setMyOrders] = useState([])
-  const {currency} = useAppContext()
+  const {currency , axios , user} = useAppContext()
 
-  const fetchMyOrders = async() => {
-    setMyOrders(dummyOrders)
+  const fetchMyOrders = async () => {
+  try {
+    const { data } = await axios.get('/api/order/user', {
+      params: { userId: user._id }
+    });
+
+    if (data.success) {
+      setMyOrders(data.orders);
+    } else {
+      console.error(data.message);
+    }
+  } catch (error) {
+    console.log("Error fetching orders:", error.message);
   }
+};
+
 
   useEffect(() => {
-    fetchMyOrders()
+    if(user){
+      fetchMyOrders();
+    }
   }
-  , [])
+  , [user])
 
   return (
     <div className='mt-16 pb-16'>
@@ -42,7 +56,7 @@ const MyOrders = () => {
                       order.items.length != index + 1 && "border-b"
              } border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-4xl`}
              >
-                  <div className='flex items-center mb-4 mb:mb-0'>
+                  <div className='flex items-center mb-4 md:mb-0'>
                     <div className='bg-primary/10 rounded-lg p-4 '>
                         <img src={item.product.image[0]} className='w-16 h-16' alt = ""/>
                       </div>

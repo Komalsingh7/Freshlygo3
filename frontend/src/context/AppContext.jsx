@@ -1,7 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyProducts } from "../assets/assets";
+
 import toast from "react-hot-toast";
+import axios from "axios";
+
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
 export const AppContext = createContext();
 
@@ -15,8 +19,45 @@ export const AppContextProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState({})
   const[searchQuery , setSearchQuery] = useState({})
 
+  const fetchSeller = async() => {
+      try {
+        const {data} = await axios.get('/api/seller/is-auth');
+        if(data.success){
+            setIsSeller(true);
+        }
+        else{
+           setIsSeller(false);
+        }
+      } catch (error) {
+              setIsSeller(false);
+      }
+  }
+
+  // fetch user auth status , user data and cart items
+  const fetchUser = async ()=>{
+      try {
+         const {data} = await axios.get('api/user/is-auth');
+         if(data.success){
+           setUser(data.user)
+           setCartItems(data.user.cartItems)
+         }
+      } catch (error) {
+          setUser(null)
+      }
+  }
+
   const fetchProducts = async() => {
-      setProducts(dummyProducts)
+      try {
+        const {data} = await axios.get('/api/product/list');
+        if(data.success){
+           setProducts(data.products)
+        }
+        else{
+          toast.error(data.message)
+        }
+      } catch (error) {
+          toast.error(error.message)
+      }
   }
 
   const addToCart = (itemId) =>{
@@ -72,8 +113,45 @@ export const AppContextProvider = ({ children }) => {
   }
 
   useEffect(()=>{
+         fetchUser()
+         fetchSeller()
          fetchProducts()
   },[])
+
+
+useEffect(() => {
+  if (!user) {
+    console.log("User is not defined. Skipping cart update.");
+    return;
+  }
+
+  console.log("cartItems updated:", cartItems);
+  console.log("User:", user);
+
+  const updateCart = async () => {
+    try {
+      const { data } = await axios.post('/api/cart/update', {
+        userId: user._id,
+        cartItems,
+      });
+      if (!data.success) {
+        toast.error(data.message);
+      } else {
+        console.log("Cart updated successfully");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  // Fix: check if cartItems is a non-empty object
+  if (cartItems && Object.keys(cartItems).length > 0) {
+    updateCart();
+  } else {
+    console.log("Cart is empty. Skipping update.");
+  }
+}, [cartItems]);
+
 
   const value = {
     navigate,
@@ -85,7 +163,7 @@ export const AppContextProvider = ({ children }) => {
     setShowUserLogin,
     products,
     currency, addToCart , updateCartItem , removeFromCart , cartItems , searchQuery , setSearchQuery,
-    getCartAmount, getCartCount
+    getCartAmount, getCartCount , axios , fetchProducts , setCartItems
   };
 
   return (

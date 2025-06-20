@@ -1,21 +1,22 @@
 import { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
-const dummyAddress = [
-  {
-    street: "123 Main St",
-    city: "Chandigarh",
-    state: "Punjab",
-    country: "India"
-  },
-  {
-    street: "456 Sector 17",
-    city: "Chandigarh",
-    state: "Punjab",
-    country: "India"
-  }
-];
+// const dummyAddress = [
+//   {
+//     street: "123 Main St",
+//     city: "Chandigarh",
+//     state: "Punjab",
+//     country: "India"
+//   },
+//   {
+//     street: "456 Sector 17",
+//     city: "Chandigarh",
+//     state: "Punjab",
+//     country: "India"
+//   }
+// ];
 
 const Cart = () => {
   const {
@@ -26,13 +27,13 @@ const Cart = () => {
     getCartCount,
     updateCartItem,
     navigate,
-    getCartAmount
+    getCartAmount , axios , user , setCartItems
   } = useAppContext();
 
   const [cartArray, setCartArray] = useState([]);
-  const [addresses, setAddresses] = useState(dummyAddress);
+  const [addresses, setAddresses] = useState([]);
   const [showAddress, setShowAddress] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentOption, setPaymentOption] = useState("COD");
 
   const getCart = () => {
@@ -47,15 +48,97 @@ const Cart = () => {
     setCartArray(tempArray);
   };
 
-  const placeOrder = async () => {
-    // Implement order placement logic here
-  };
+  const getUserAddress = async () => {
+  try {
+    console.log("Calling address get with userId:", user?._id); // Optional debug
+
+    const { data } = await axios.get('/api/address/get', {
+      params: { userId: user._id }   // ✅ Send userId via query string
+    });
+
+    if (data.success) {
+      setAddresses(data.addresses);
+      if (data.addresses.length > 0) {
+        setSelectedAddress(data.addresses[0]);
+      }
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    console.log("Error fetching address:", error.response?.data || error.message); // 🐞 Debugging
+    toast.error(error.message);
+  }
+};
+
+
+
+   const placeOrder = async () => {
+  try {
+    if (!selectedAddress) {
+      return toast.error("Please select an address");
+    }
+
+    let response;
+    let data;
+
+    // Place Order with COD
+    if (paymentOption === "COD") {
+      response = await axios.post('/api/order/cod', {
+        userId: user._id,
+        items: cartArray.map(item => ({
+          product: item._id,
+          quantity: item.quantity,
+        })),
+        address: selectedAddress._id,
+      });
+      data = response.data;
+
+      if (data.success) {
+        toast.success("Order placed successfully");
+        setCartItems({}); // Clear cart after placing order
+        navigate('/my-orders');
+      } else {
+        toast.error(data.message);
+      }
+    } else {
+      // Stripe order
+      response = await axios.post('/api/order/stripe', {
+        userId: user._id,
+        items: cartArray.map(item => ({
+          product: item._id,
+          quantity: item.quantity,
+        })),
+        address: selectedAddress._id,
+      });
+
+      data = response.data;
+
+      if (data.success) {
+        window.location.replace(data.url); // Redirect to Stripe Checkout
+      } else {
+        toast.error(data.message);
+      }
+    }
+  } catch (error) {
+    console.error("Error placing order:", error.response?.data || error.message);
+    toast.error(error.message || "Failed to place order");
+  }
+};
+
+
 
   useEffect(() => {
     if (products.length > 0 && cartItems) {
       getCart();
     }
   }, [products, cartItems]);
+
+  useEffect(() => {
+        if(user){
+           getUserAddress();
+        }
+  },[user]);
+
 
   const baseAmount = getCartAmount();
   const tax = baseAmount * 0.02;
