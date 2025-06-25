@@ -16,7 +16,7 @@ import { stripeWebhooks } from './controllers/orderController.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const allowedOrigins = ['http://localhost:5173' , 'https://freshlygo.vercel.app/'];
+const allowedOrigins = ['http://localhost:5173' , 'https://freshlygo.vercel.app'];
 app.post('/stripe' , express.raw({type:'application/json'}) , stripeWebhooks)
 await connectDB();
 await connectCloudinary();
