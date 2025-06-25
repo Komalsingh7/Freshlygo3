@@ -24,7 +24,7 @@ const MyOrders = () => {
 
 
   useEffect(() => {
-    if(user){
+    if(user?._id){
       fetchMyOrders();
     }
   }
