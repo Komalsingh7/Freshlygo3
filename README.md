@@ -9,7 +9,6 @@
 - 🔗 **Live Demo:** [https://freshlygo-demo.vercel.app](https://freshlygo-demo.vercel.app)  
 - 📽️ **Video Walkthrough:** [Watch on YouTube](https://youtu.be/demo-video-link)
 
-> *(Replace with actual URLs to your deployed site and demo video)*
 
 ---
 
