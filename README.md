@@ -4,11 +4,6 @@
 
 ---
 
-## 🚀 Live Demo & Video
-
-- 🔗 **Live Demo:** [https://freshlygo-demo.vercel.app](https://freshlygo-demo.vercel.app)  
-- 📽️ **Video Walkthrough:** [Watch on YouTube](https://youtu.be/demo-video-link)
-
 
 ---
 
