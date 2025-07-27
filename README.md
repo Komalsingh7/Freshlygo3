@@ -33,7 +33,7 @@
 | Database    | MongoDB (via Mongoose)                         |
 | Auth        | JWT, bcrypt                                    |
 | Payments    | Stripe API                                     |
-| File Upload | Cloudinary (optional if implemented)           |
+| File Upload | Cloudinary          |
 
 ---
 
